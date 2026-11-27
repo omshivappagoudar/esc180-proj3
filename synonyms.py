@@ -78,7 +78,41 @@ def build_semantic_descriptors_from_files(filenames):
 
 
 def most_similar_word(word, choices, semantic_descriptors, similarity_fn):
-    pass
+    if word not in semantic_descriptors or semantic_descriptors[word] == {}:
+        return choices[0]
+    
+    vec_word = semantic_descriptors[word]
+    results = []
+
+    for choice in choices:
+
+        if choice not in semantic_descriptors or semantic_descriptors[choice] == {}:
+            results.append(-1)
+        else:
+            results.append(similarity_fn(vec_word, semantic_descriptors[choice]))
+
+    index = results.index(max(results))
+    return choices[index]
+
+
 
 def run_similarity_test(filename, semantic_descriptors, similarity_fn):
-    pass
+
+    count_correct = 0
+    count_total = 0
+
+    with open(filename, 'r', encoding='latin-1') as file_in:
+
+        for line in file_in:
+            line = line.strip().split()
+            word = line[0]
+            choices = line[2:]
+            answer = line[1]
+            most_similar = most_similar_word(word, choices, semantic_descriptors, similarity_fn)
+            if most_similar == answer:
+                count_correct += 1
+            count_total += 1
+
+    return 100 * (count_correct/count_total)
+
+
